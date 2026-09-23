@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  title: Контракт процесса AlfaGen
+  version: 1.0.0
+  description: >-
+    Парное маскирование/восстановление с учётом содержимого. Новый ID маскируется;
+    тот же ID с возвращённым маском восстанавливает. Повторы оригинала возвращают
+    тот же маск. Сетевой доступ проверяющего находится в белом списке; Bearer-доступ
+    — дополнительная опция.
+paths:
+  /process:
+    post:
+      operationId: process
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProcessRequest'
+      responses:
+        '200':
+          description: Защищённый или восстановленный текст
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessResponse'
+        '429':
+          description: Превышена ограниченная ёмкость; повторите согласно Retry-After
+        '4XX':
+          description: Некорректный, неавторизованный, конфликтующий или истёкший запрос
+        '5XX':
+          description: Сбой защиты, состояния или приложения; нет небезопасного отката
+components:
+  schemas:
+    ProcessRequest:
+      type: object
+      required: [payload, payload_id]
+      properties:
+        payload:
+          type: string
+        payload_id:
+          type: string
+    ProcessResponse:
+      type: object
+      required: [result]
+      properties:
+        result:
+          type: string
